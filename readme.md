@@ -41,7 +41,7 @@ The frontend is organized into static and template folders:
 
 ## Frontend Architecture 🖥️
 
-The frontend of the P6 Unified App is built using a combination of vanilla JavaScript and popular libraries to create interactive and responsive user interfaces. Here's an overview of the frontend architecture for each main feature:
+The frontend of the PMO Tool is built using a combination of vanilla JavaScript and popular libraries to create interactive and responsive user interfaces. Here's an overview of the frontend architecture for each main feature:
 
 1. **Cost Dashboard** 💰
    - Libraries: Chart.js, FileSaver.js
@@ -333,6 +333,6 @@ The frontend of the P6 Unified App is built using a combination of vanilla JavaS
 
 ## Conclusion
 
-This README provides a comprehensive overview of the P6 Unified App, including its current state, planned improvements, and migration strategies. It serves as a roadmap for the development team to enhance and scale the application. Regular updates to this document are recommended as the project evolves.
+This README provides a comprehensive overview of the PMO Tool, including its current state, planned improvements, and migration strategies. It serves as a roadmap for the development team to enhance and scale the application. Regular updates to this document are recommended as the project evolves.
 
 For any questions or clarifications, please contact the project manager or lead developer.
