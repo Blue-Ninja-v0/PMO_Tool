@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P6 - Project Management Insights</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+</head>
+<body>
+    <nav class="nav-bar">
+        <ul>
+            <li><a href="{{ url_for('index') }}"><span class="nav-icon">🏠</span>Home</a></li>
+            <li><a href="{{ url_for('driving_paths') }}"><span class="nav-icon">🕸️</span>Driving Paths</a></li>
+            <li><a href="{{ url_for('gantt_chart') }}"><span class="nav-icon">📅</span>Gantt Chart</a></li>
+            <li><a href="{{ url_for('cost_dashboard') }}"><span class="nav-icon">💰</span>Cost Dashboard</a></li>
+            <li><a href="{{ url_for('movement') }}"><span class="nav-icon">🔄</span>Movement</a></li>
+        </ul>
+    </nav>
+    <div class="container">
+        <h1>Welcome to P6 Wizard</h1>
+        <p class="intro">Analyse project and cost performance with our integrated management tools.</p>
+        
+        <div class="feature-grid">
+            <div class="feature-card">
+                <span class="feature-icon">🕸️</span>
+                <h2>Driving Paths</h2>
+                <p>Visualise critical and sub-critical paths, and their task relationships to optimise project flow.</p>
+                <a href="{{ url_for('driving_paths') }}" class="feature-link">Explore Paths</a>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">📅</span>
+                <h2>Gantt Chart</h2>
+                <p>Model change and delay scenarios with our interactive Gantt chart.</p>
+                <a href="{{ url_for('gantt_chart') }}" class="feature-link">View Schedule</a>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">💰</span>
+                <h2>Cost Dashboard</h2>
+                <p>Track and analyse project costs with detailed breakdowns and forecasts.</p>
+                <a href="{{ url_for('cost_dashboard') }}" class="feature-link">Analyze Costs</a>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">🔄</span>
+                <h2>Movement</h2>
+                <p>Compare schedule revisions to identify and understand key changes.</p>
+                <a href="{{ url_for('movement') }}" class="feature-link">Track Changes</a>
+            </div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+</body>
+</html>

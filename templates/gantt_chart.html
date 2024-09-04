@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P6 Unified App - Project Gantt Chart</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dhtmlx-gantt@8.0.1/codebase/dhtmlxgantt.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/gantt_chart.css') }}">
+    <link rel='stylesheet' href='{{ url_for('static', filename='css/main-controls.css') }}'>
+</head>
+<body>
+    <nav class='nav-bar'>
+      <ul>
+        <li><a href='{{ url_for('index') }}'><span class='nav-icon'>🏠</span>Home</a></li>
+        <li><a href='{{ url_for('driving_paths') }}'><span class='nav-icon'>🕸️</span>Driving Paths</a></li>
+        <li><a href='{{ url_for('gantt_chart') }}'><span class='nav-icon'>📅</span>Gantt Chart</a></li>
+        <li><a href='{{ url_for('cost_dashboard') }}'><span class='nav-icon'>💰</span>Cost Dashboard</a></li>
+        <li><a href='{{ url_for('movement') }}'><span class='nav-icon'>🔄</span>Movement</a></li>
+      </ul>
+    </nav>
+    <div class="container">
+        <h1>Gantt Chart</h1>
+        <select id="project-select">
+            <option value="">Select a project</option>
+        </select>
+        <div id='gantt-container' style='position: relative;'>
+            <div id='gantt_here'></div>
+            <div id='gantt-controls' class='gantt-controls-overlay'>
+                <button id='zoom-in' class='control-button' title='Zoom In'>+</button>
+                <button id='zoom-out' class='control-button' title='Zoom Out'>-</button>
+                <button id='pan-left' class='control-button' title='Pan Left'>←</button>
+                <button id='pan-right' class='control-button' title='Pan Right'>→</button>
+                <button id='pan-up' class='control-button' title='Pan Up'>↑</button>
+                <button id='pan-down' class='control-button' title='Pan Down'>↓</button>
+                <button id='reset-view' class='control-button' title='Reset View'>⟲</button>
+                <button id='export-svg' class='control-button' title='Export SVG'>↧</button>
+                <button id='share-graph' class='control-button' title='Share Graph'>↗</button>
+            </div>
+        </div>
+        <div id="filter-controls">
+            <select id="filter-project">
+                <option value="">Filter by Project</option>
+            </select>
+            <input type="text" id="filter-task-name" placeholder="Filter by Task Name">
+            <select id="filter-status">
+                <option value="">All Statuses</option>
+                <option value="in_progress">In Progress</option>
+                <option value="completed">Completed</option>
+            </select>
+            <label for="filter-driving-path">
+                <input type="checkbox" id="filter-driving-path"> Show Driving Path Only
+            </label>
+            <button id="wbs-toggle">Enable WBS</button>
+            <button id="apply-filters">Apply Filters</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/dhtmlx-gantt@8.0.1/codebase/dhtmlxgantt.js"></script>
+    <script src="{{ url_for('static', filename='js/gantt_chart.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+</body>
+</html>

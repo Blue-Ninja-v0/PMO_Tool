@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P6 Unified App - Movement Comparison</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/movement.css') }}">
+    <link rel='stylesheet' href='{{ url_for('static', filename='css/main-controls.css') }}'>
+</head>
+<body>
+    <nav class='nav-bar'>
+      <ul>
+        <li><a href='{{ url_for('index') }}'><span class='nav-icon'>🏠</span>Home</a></li>
+        <li><a href='{{ url_for('driving_paths') }}'><span class='nav-icon'>🕸️</span>Driving Paths</a></li>
+        <li><a href='{{ url_for('gantt_chart') }}'><span class='nav-icon'>📅</span>Gantt Chart</a></li>
+        <li><a href='{{ url_for('cost_dashboard') }}'><span class='nav-icon'>💰</span>Cost Dashboard</a></li>
+        <li><a href='{{ url_for('movement') }}'><span class='nav-icon'>🔄</span>Movement</a></li>
+      </ul>
+    </nav>
+    <div class="container">
+        <h1>Movement Comparison</h1>
+        <div id="controls">
+            <select id="upload-select-1"></select>
+            <select id="upload-select-2"></select>
+            <select id="project-select">
+                <option value="">Select a project</option>
+            </select>
+            <button id="compare-uploads">Compare Uploads</button>
+        </div>
+        <div id="comparison-summary">
+            <!-- Summary of comparison results will be displayed here -->
+        </div>
+        <div id="filter-controls">
+            <div id='comparison-method'>
+                <label>
+                    <input type='radio' name='comparison-method' value='id' checked> Compare by ID
+                </label>
+                <label>
+                    <input type='radio' name='comparison-method' value='name'> Compare by Name
+                </label>
+            </div>
+            <input type="text" id="task-filter" placeholder="Filter by task name">
+            <select id="change-type-filter">
+                <option value="">All change types</option>
+                <option value="added">Added</option>
+                <option value="removed">Removed</option>
+                <option value="modified">Modified</option>
+            </select>
+            <select id="cost-change-filter">
+                <option value="">All cost changes</option>
+                <option value="increased">Cost Increased</option>
+                <option value="decreased">Cost Decreased</option>
+                <option value="no_change">No Cost Change</option>
+            </select>
+            <button id="apply-filters">Apply Filters</button>
+            <button id="export-csv">Export to CSV</button>
+        </div>
+        <div id="analysis-container">
+            <!-- Analysis of comparison results will be displayed here -->
+        </div>
+        <div id="comparison-container">
+            <!-- Detailed comparison results will be displayed here -->
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/movement.js') }}"></script>
+</body>
+</html>

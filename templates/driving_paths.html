@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P6 Unified App - Driving Paths Visualizer</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/driving_paths.css') }}">
+    <link rel='stylesheet' href='{{ url_for('static', filename='css/main-controls.css') }}'>
+</head>
+<body>
+    <nav class='nav-bar'>
+      <ul>
+        <li><a href='{{ url_for('index') }}'><span class='nav-icon'>🏠</span>Home</a></li>
+        <li><a href='{{ url_for('driving_paths') }}'><span class='nav-icon'>🕸️</span>Driving Paths</a></li>
+        <li><a href='{{ url_for('gantt_chart') }}'><span class='nav-icon'>📅</span>Gantt Chart</a></li>
+        <li><a href='{{ url_for('cost_dashboard') }}'><span class='nav-icon'>💰</span>Cost Dashboard</a></li>
+        <li><a href='{{ url_for('movement') }}'><span class='nav-icon'>🔄</span>Movement</a></li>
+      </ul>
+    </nav>
+    <div class="container">
+        <h1>Driving Path Clusters</h1>
+        <div id="controls">
+            <select id="upload-select"></select>
+            <select id="project-select"></select>
+            <select id="layout-toggle">
+                <option value="spring">Spring Layout</option>
+                <option value="spectral">Spectral Layout</option>
+            </select>
+            <label for="node-count">Number of Nodes:</label>
+            <input type="number" id="node-count" min="25" max="1000" value="50">
+            <input type="text" id="keyword-filter" placeholder="Enter keyword to highlight">
+            <button id="load-graph">Load Graph</button>
+        </div>
+        <div id='graph-container' style='position: relative;'>
+            <svg id='graph'></svg>
+            <div id='graph-controls' class='graph-controls-overlay'>
+                <button id='zoom-in' class='control-button' title='Zoom In'>+</button>
+                <button id='zoom-out' class='control-button' title='Zoom Out'>-</button>
+                <button id='pan-up' class='control-button' title='Pan Up'>↑</button>
+                <button id='pan-down' class='control-button' title='Pan Down'>↓</button>
+                <button id='pan-left' class='control-button' title='Pan Left'>←</button>
+                <button id='pan-right' class='control-button' title='Pan Right'>→</button>
+                <button id='reset-view' class='control-button' title='Reset View'>⟲</button>
+                <button id='export-svg' class='control-button' title='Export SVG'>↧</button>
+                <button id='share-graph' class='control-button' title='Share Graph'>↗</button>
+            </div>
+        </div>
+        <div id="loading">Loading graph...</div>
+        <div id="graph-info"></div>
+        <div id="task-details" class="task-details-box hidden">
+            <button id="close-task-details" class="close-button">&times;</button>
+            <h3>Task Details</h3>
+            <div id="task-details-content"></div>
+            <div class="task-relations">
+                <div class="predecessors">
+                    <h4>Predecessors</h4>
+                    <ul id="predecessors-list"></ul>
+                </div>
+                <div class="successors">
+                    <h4>Successors</h4>
+                    <ul id="successors-list"></ul>
+                </div>
+            </div>
+        </div>
+        <div id="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #E0134A;"></div>
+                <span>On Driving Path</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #3686B4;"></div>
+                <span>Other Tasks</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #0EA76D;"></div>
+                <span>Key Start Node</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #FFB142;"></div>
+                <span>Key End Node</span>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/driving_paths.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+</body>
+</html>

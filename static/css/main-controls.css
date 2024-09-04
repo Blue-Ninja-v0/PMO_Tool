@@ -1,0 +1,98 @@
+/* main-controls.css */
+
+/* Common styles for all control containers */
+#controls, #filter-controls, #dashboard-container {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 5px;
+}
+
+/* Buttons */
+button {
+    background-color: #3686B4;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+button:hover {
+    background-color: #2C6F96;
+}
+
+/* Dropdowns */
+select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-color: #ffffff;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    padding: 8px 32px 8px 12px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #495057;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Cpath fill='%23343a40' d='M4 6L0 2h8z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 8px 8px;
+    cursor: pointer;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+select:hover {
+    border-color: #b3c1cd;
+}
+
+select:focus {
+    border-color: #3686B4;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(54, 134, 180, 0.25);
+}
+
+/* For Safari */
+@media not all and (min-resolution:.001dpcm) {
+    @supports (-webkit-appearance:none) {
+        select {
+            padding-right: 32px;
+        }
+    }
+}
+
+/* Remove default arrow in IE */
+select::-ms-expand {
+    display: none;
+}
+
+/* Inputs */
+input[type="text"], input[type="number"] {
+    padding: 8px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 14px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+}
+
+/* Checkboxes and Labels */
+input[type="checkbox"] {
+    margin-right: 5px;
+}
+
+label {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 15px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    select, input[type="text"], input[type="number"], button {
+        width: 100%;
+        margin-right: 0;
+    }
+}

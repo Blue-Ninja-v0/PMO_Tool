@@ -1,0 +1,97 @@
+@import url('styles.css');
+
+#dashboard-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.top-row {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+#overall-costs, #resource-breakdown {
+    width: 48%;
+    background-color: #f0f0f0;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.bottom-row {
+    width: 100%;
+}
+
+#task-costs {
+    width: 100%;
+    background-color: #f0f0f0;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+#trends-section {
+    width: 100%;
+    margin-top: 20px;
+    background-color: #f0f0f0;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+
+
+.chart-description {
+    font-size: 0.9em;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+#task-search {
+    margin-bottom: 10px;
+}
+
+#task-search-input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+#time-period-selector {
+    margin-bottom: 10px;
+}
+
+.time-button {
+    background-color: #e0e0e0;
+    border: none;
+    padding: 8px 12px;
+    margin-right: 5px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.time-button:hover, .time-button.active {
+    background-color: #d0d0d0;
+}
+
+canvas {
+    max-width: 100%;
+    height: auto !important;
+}
+
+@media (max-width: 768px) {
+    .top-row {
+        flex-direction: column;
+    }
+
+    #overall-costs, #resource-breakdown {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+}

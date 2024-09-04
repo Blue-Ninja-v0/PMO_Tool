@@ -1,0 +1,52 @@
+# P6 Unified App Dependencies
+# Last updated: 2023-05-23
+
+# Core dependencies
+Flask==2.2.3
+Flask-SQLAlchemy==3.0.3
+Flask-Caching==2.0.2
+SQLAlchemy==1.4.46
+networkx==2.8.8
+python-dateutil==2.8.2
+
+# Data processing and analysis
+numpy==1.24.3
+pandas==2.0.1
+scipy==1.10.1
+
+
+
+# ALL THE BELOW IS DRAFT - PLEASE UPDATE TO ALIGN WITH ACTUAL ARCHITECTURE & DB PLEASE
+
+
+# Database
+psycopg2-binary==2.9.6  # For PostgreSQL support
+
+# API and serialization
+flask-restful==0.3.9
+marshmallow==3.19.0
+
+# Security
+Flask-Bcrypt==1.0.1
+Flask-JWT-Extended==4.4.4
+
+# Testing
+pytest==7.3.1
+pytest-flask==1.2.0
+
+# Development tools
+black==23.3.0
+flake8==6.0.0
+isort==5.12.0
+
+# Production server
+gunicorn==20.1.0
+
+# Environment variable management
+python-dotenv==1.0.0
+
+# Async task queue (if needed)
+# celery==5.2.7
+
+# Uncomment the following line if using Redis for caching or as a message broker
+# redis==4.5.5

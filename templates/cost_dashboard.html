@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>P6 Unified App - Cost Dashboard</title>
+    <link rel='stylesheet' href='{{ url_for('static', filename='css/styles.css') }}'>
+    <link rel='stylesheet' href='{{ url_for('static', filename='css/cost_dashboard.css') }}'>
+    <script src='https://d3js.org/d3.v6.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/chart.js'></script>
+    <link rel='stylesheet' href='{{ url_for('static', filename='css/main-controls.css') }}'>
+</head>
+<body>
+    <nav class='nav-bar'>
+      <ul>
+        <li><a href='{{ url_for('index') }}'><span class='nav-icon'>🏠</span>Home</a></li>
+        <li><a href='{{ url_for('driving_paths') }}'><span class='nav-icon'>🕸️</span>Driving Paths</a></li>
+        <li><a href='{{ url_for('gantt_chart') }}'><span class='nav-icon'>📅</span>Gantt Chart</a></li>
+        <li><a href='{{ url_for('cost_dashboard') }}'><span class='nav-icon'>💰</span>Cost Dashboard</a></li>
+        <li><a href='{{ url_for('movement') }}'><span class='nav-icon'>🔄</span>Movement</a></li>
+      </ul>
+    </nav>
+    <div class='container'>
+        <h1>Cost Dashboard</h1>
+        <div id='controls'>
+            <select id='upload-select'></select>
+            <select id='project-select'></select>
+            <button id='load-data'>Load Data</button>
+        </div>
+        <div id='dashboard-container'>
+            <div class='top-row'>
+                <div id='overall-costs'>
+                    <h2>Overall Project Costs</h2>
+                    <div class='chart-description'>Overview of actual, target, and remaining costs for the entire project.</div>
+                    <canvas id='overall-costs-chart'></canvas>
+                    <div id='overall-costs-totals'></div>
+                </div>
+                <div id='resource-breakdown'>
+                    <h2>Resource Cost Breakdown</h2>
+                    <div class='chart-description'>Distribution of costs across different project resources.</div>
+                    <canvas id='resource-breakdown-chart'></canvas>
+                </div>
+            </div>
+            <div class='bottom-row'>
+                <div id='task-costs'>
+                    <h2>Top 10 Task Costs</h2>
+<div id='task-costs-metrics' class='metrics-display chart-description'>
+    <span>Total Actual: <span id='task-total-actual'>0</span></span>
+    <span>Total Target: <span id='task-total-target'>0</span></span>
+    <span>Total Remaining: <span id='task-total-remaining'>0</span></span>
+</div>
+                    <div id='task-search'>
+                        <input type='text' id='task-search-input' placeholder='Search tasks...'>
+                    </div>
+                    <canvas id='task-costs-chart'></canvas>
+                </div>
+            </div>
+        </div>
+        <div id="trends-section">
+            <h2>Cost Forecast</h2>
+            <div class="chart-description">Historical view of project costs over time.</div>
+            <div id="time-period-selector">
+                <button class="time-button" data-period="monthly">Monthly</button>
+                <button class="time-button" data-period="quarterly">Quarterly</button>
+                <button class="time-button" data-period="yearly">Yearly</button>
+                <button id="export-forecast" class="export-button">Export to CSV</button>
+            </div>
+            
+            <canvas id="cost-forecast-chart"></canvas>
+        </div>
+    </div>
+    <script src='https://cdn.jsdelivr.net/npm/chartjs-plugin-dragdata'></script>
+    <script src='{{ url_for('static', filename='js/cost_dashboard.js') }}'></script>
+</body>
+</html>
