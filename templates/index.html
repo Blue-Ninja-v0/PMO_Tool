@@ -15,6 +15,7 @@
             <li><a href="{{ url_for('gantt_chart') }}"><span class="nav-icon">📅</span>Gantt Chart</a></li>
             <li><a href="{{ url_for('cost_dashboard') }}"><span class="nav-icon">💰</span>Cost Dashboard</a></li>
             <li><a href="{{ url_for('movement') }}"><span class="nav-icon">🔄</span>Movement</a></li>
+            <li><div style="cursor: pointer;" onClick="handleLogout()"><span class="nav-icon">❌</span>Log out</div></li>
         </ul>
     </nav>
     <div class="container">
@@ -49,5 +50,17 @@
         </div>
     </div>
     <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+    <script>
+        if(!sessionStorage.getItem("loggedIn")){
+            window.location.href="/login"
+        }
+
+        function handleLogout() {
+            sessionStorage.clear()
+            window.location.href="/login";
+        }
+
+    </script>
+
 </body>
 </html>

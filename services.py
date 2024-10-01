@@ -1,7 +1,7 @@
 from models import db, Project, Task, TaskPred, TaskRsrc
 from sqlalchemy import text, func
 import networkx as nx
-from dateutil import parser
+from dateutil.parser import parser
 from datetime import datetime
 import logging
 

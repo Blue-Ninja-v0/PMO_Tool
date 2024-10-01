@@ -1,3 +1,6 @@
+from xml.etree.ElementTree import tostring
+
+import bcrypt
 from flask import Flask, render_template, jsonify, request, abort, Response
 from flask_sqlalchemy import SQLAlchemy
 from flask_caching import Cache
@@ -6,9 +9,15 @@ import logging
 from sqlalchemy.pool import QueuePool
 from sqlalchemy import text, func
 import csv
+import jwt
+import pytz
+from functools import wraps
+from datetime import datetime, timedelta, timezone
 from io import StringIO
-from models import db, Project, Task, TaskPred, TaskRsrc
+from models import db, User, Project, Task, TaskPred, TaskRsrc
+
 from services import *
+from flask_migrate import Migrate
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -32,7 +41,9 @@ app.config['CACHE_TYPE'] = 'simple'
 app.config['CACHE_DEFAULT_TIMEOUT'] = 300
 
 db.init_app(app)
+migrate = Migrate(app, db)  # Initialize Flask-Migrate
 cache = Cache(app)
+
 
 # Helper functions have been moved to services.py
 
@@ -41,21 +52,88 @@ cache = Cache(app)
 def index():
     return render_template('index.html')
 
+
+@app.route('/login')
+def login_page():
+    return render_template('login.html')
+
+
 @app.route('/driving_paths')
 def driving_paths():
     return render_template('driving_paths.html')
+
 
 @app.route('/gantt_chart')
 def gantt_chart():
     return render_template('gantt_chart.html')
 
+
 @app.route('/cost_dashboard')
 def cost_dashboard():
     return render_template('cost_dashboard.html')
 
+
 @app.route('/movement')
 def movement():
     return render_template('movement.html')
+
+
+@app.route('/api/signup', methods=['POST'])
+def signup():
+    try:
+        data = request.get_json()
+        username = data.get('username')
+        email = data.get('email')
+        password = data.get('password')
+
+        if not username or not email or not password:
+            return jsonify({"error": "All fields are required."}), 400
+
+        # Check if user already exists
+        existing_user = User.query.filter_by(user_email=email).first()
+        if existing_user:
+            return jsonify({"error": "User already exists."}), 409
+
+        # Hash the password
+        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+
+        # Create a new user
+        new_user = User(user_name=username, user_email=email, user_password=hashed_password)
+        db.session.add(new_user)
+        db.session.commit()
+
+        return jsonify({"message": "User created successfully."}), 201
+
+    except Exception as e:
+        logging.error(f'Error during signup: {str(e)}')
+        return jsonify({"error": "Failed to create user."}), 500
+
+
+# User Login API
+@app.route('/api/login', methods=['POST'])
+def login():
+    try:
+        data = request.get_json()
+        email = data.get('email')
+        password = data.get('password')
+
+        # Fetch user from the database
+        user = User.query.filter_by(user_email=email).first()
+
+        # Check if user exists and verify password
+        if user and bcrypt.checkpw(password.encode('utf-8'), user.user_password):
+            # print("user=", user.user_email,datetime(datetime.now(timezone.utc) + timedelta(hours=1)))
+            # print("user =", user.user_email)
+            print("user =", user.user_id)
+            token = jwt.encode({"id": user.user_id, "exp": datetime.now(timezone.utc) + timedelta(hours=1)}, "private_key", algorithm="HS256")
+
+            return jsonify(token), 200
+        else:
+            return jsonify({'error': 'Invalid credentials'}), 401
+    except Exception as e:
+        logging.error(f"Error during login: {str(e)}")
+        return jsonify({'error': 'Failed to login'}), 500
+
 
 @app.route('/api/uploads')
 @cache.cached(timeout=60)
@@ -67,13 +145,16 @@ def get_uploads():
         logging.error(f"Error fetching uploads: {str(e)}")
         return jsonify({"error": "Failed to fetch uploads"}), 500
 
+
 @app.route('/api/projects')
 @cache.cached(timeout=60, query_string=True)
 def get_projects():
     try:
         xer_file_id = request.args.get('xer_file_id', type=int)
         if xer_file_id:
-            projects = db.session.query(Task.proj_id, Project.proj_short_name).join(Project, Task.proj_id == Project.proj_id).filter_by(xer_file_id=xer_file_id).distinct().all()
+            projects = db.session.query(Task.proj_id, Project.proj_short_name).join(Project,
+                                                                                    Task.proj_id == Project.proj_id).filter_by(
+                xer_file_id=xer_file_id).distinct().all()
         else:
             projects = Project.query.all()
         if not projects:
@@ -82,6 +163,7 @@ def get_projects():
     except Exception as e:
         logging.error(f"Error fetching projects: {str(e)}")
         return jsonify({"error": "Failed to fetch projects"}), 500
+
 
 @app.route('/api/graph')
 @cache.cached(timeout=300, query_string=True)
@@ -92,13 +174,15 @@ def get_graph():
         layout_type = request.args.get('layout', 'spring')
         node_count = request.args.get('node_count', default=50, type=int)
 
-        logging.info(f"Received request for graph. xer_file_id: {xer_file_id}, proj_ids: {proj_ids}, layout: {layout_type}, node_count: {node_count}")
+        logging.info(
+            f"Received request for graph. xer_file_id: {xer_file_id}, proj_ids: {proj_ids}, layout: {layout_type}, node_count: {node_count}")
 
         if node_count < 25 or node_count > 1000:
             abort(400, description="node_count must be between 25 and 1000")
 
         if not proj_ids or (len(proj_ids) == 1 and proj_ids[0] == '[object Object]'):
-            proj_ids = [proj[0] for proj in db.session.query(Task.proj_id).filter_by(xer_file_id=xer_file_id).distinct().all()]
+            proj_ids = [proj[0] for proj in
+                        db.session.query(Task.proj_id).filter_by(xer_file_id=xer_file_id).distinct().all()]
             logging.info(f"No valid proj_ids provided. Using all projects for xer_file_id {xer_file_id}: {proj_ids}")
 
         G = nx.DiGraph()
@@ -112,30 +196,32 @@ def get_graph():
             logging.info(f"For project {proj_id}: Found {len(tasks)} tasks and {len(task_preds)} task predecessors")
 
             for task in tasks:
-                G.add_node(task.task_id, name=task.task_name, 
+                G.add_node(task.task_id, name=task.task_name,
                            start=task.early_start_date, end=task.early_end_date,
-                           float=task.total_float_hr_cnt, 
+                           float=task.total_float_hr_cnt,
                            remaining_duration=task.remain_drtn_hr_cnt,
                            driving_path=task.driving_path_flag if hasattr(task, 'driving_path_flag') else 'N',
                            project=task.proj_id)
 
             for pred in task_preds:
-                G.add_edge(pred.pred_task_id, pred.task_id, 
+                G.add_edge(pred.pred_task_id, pred.task_id,
                            type=pred.pred_type, lag=pred.lag_hr_cnt)
 
         cost_data = db.session.query(
             Task.task_id,
-            func.sum(func.coalesce(TaskRsrc.act_reg_cost, 0) + func.coalesce(TaskRsrc.act_ot_cost, 0)).label('actual_cost'),
+            func.sum(func.coalesce(TaskRsrc.act_reg_cost, 0) + func.coalesce(TaskRsrc.act_ot_cost, 0)).label(
+                'actual_cost'),
             func.sum(func.coalesce(TaskRsrc.target_cost, 0)).label('target_cost'),
             func.sum(func.coalesce(TaskRsrc.remain_cost, 0)).label('remain_cost')
-        ).outerjoin(TaskRsrc, (Task.task_id == TaskRsrc.task_id) & 
-                      (Task.proj_id == TaskRsrc.proj_id) & 
-                      (Task.xer_file_id == TaskRsrc.xer_file_id)) \
-        .filter(Task.xer_file_id == xer_file_id, Task.proj_id.in_(proj_ids)) \
-        .group_by(Task.task_id) \
-        .all()
+        ).outerjoin(TaskRsrc, (Task.task_id == TaskRsrc.task_id) &
+                    (Task.proj_id == TaskRsrc.proj_id) &
+                    (Task.xer_file_id == TaskRsrc.xer_file_id)) \
+            .filter(Task.xer_file_id == xer_file_id, Task.proj_id.in_(proj_ids)) \
+            .group_by(Task.task_id) \
+            .all()
 
-        cost_dict = {task.task_id: {'actual_cost': task.actual_cost, 'target_cost': task.target_cost, 'remain_cost': task.remain_cost} for task in cost_data}
+        cost_dict = {task.task_id: {'actual_cost': task.actual_cost, 'target_cost': task.target_cost,
+                                    'remain_cost': task.remain_cost} for task in cost_data}
 
         if not G.nodes:
             logging.warning(f"No tasks found for projects {proj_ids} in xer_file_id {xer_file_id}")
@@ -199,7 +285,7 @@ def get_graph():
             }
             nodes_data.append(node_data)
 
-        links_data = [{'source': u, 'target': v, 'type': data['type'], 'lag': data['lag']} 
+        links_data = [{'source': u, 'target': v, 'type': data['type'], 'lag': data['lag']}
                       for u, v, data in subgraph.edges(data=True)]
 
         key_start, key_end = identify_key_nodes(nodes_data)
@@ -216,6 +302,7 @@ def get_graph():
         logging.error(f"Error generating graph: {str(e)}", exc_info=True)
         return jsonify({"error": "Failed to generate graph"}), 500
 
+
 @app.route('/api/gantt_data')
 @cache.cached(timeout=300, query_string=True)
 def get_gantt_data():
@@ -228,6 +315,7 @@ def get_gantt_data():
     gantt_data = process_gantt_data(tasks, dependencies, use_wbs)
 
     return jsonify(gantt_data)
+
 
 @app.route('/api/cost_dashboard/overall')
 @cache.cached(timeout=300, query_string=True)
@@ -285,6 +373,7 @@ def get_overall_costs():
         logging.error(f'Error fetching overall costs: {str(e)}')
         return jsonify({'error': 'Failed to fetch overall costs'}), 500
 
+
 @app.route('/api/cost_dashboard/tasks')
 @cache.cached(timeout=300, query_string=True)
 def get_task_costs():
@@ -329,6 +418,7 @@ def get_task_costs():
     except Exception as e:
         logging.error(f'Error fetching task costs: {str(e)}')
         return jsonify({'error': 'Failed to fetch task costs'}), 500
+
 
 @app.route('/api/cost_dashboard/resources')
 @cache.cached(timeout=300, query_string=True)
@@ -375,6 +465,7 @@ def get_resource_costs():
         logging.error(f'Error fetching resource costs: {str(e)}')
         return jsonify({'error': 'Failed to fetch resource costs'}), 500
 
+
 @app.route('/api/cost_dashboard/forecast')
 @cache.cached(timeout=300, query_string=True)
 def get_cost_forecast():
@@ -382,7 +473,7 @@ def get_cost_forecast():
         xer_file_id = request.args.get('xer_file_id', type=int)
         proj_id = request.args.get('proj_id')
         time_period = request.args.get('time_period', default='monthly')
-        
+
         # Validate time_period
         if time_period not in ['monthly', 'quarterly', 'yearly']:
             return jsonify({'error': 'Invalid time period'}), 400
@@ -411,8 +502,8 @@ def get_cost_forecast():
         ''')
 
         results = db.session.execute(query, {
-            'xer_file_id': xer_file_id, 
-            'proj_id': proj_id, 
+            'xer_file_id': xer_file_id,
+            'proj_id': proj_id,
             'time_period': time_period
         }).fetchall()
 
@@ -427,6 +518,7 @@ def get_cost_forecast():
         logging.error(f'Error fetching cost forecast: {str(e)}')
         return jsonify({'error': 'Failed to fetch cost forecast'}), 500
 
+
 @app.route('/api/cost_dashboard/export_forecast')
 @cache.cached(timeout=300, query_string=True)
 def export_forecast():
@@ -434,7 +526,7 @@ def export_forecast():
         xer_file_id = request.args.get('xer_file_id', type=int)
         proj_id = request.args.get('proj_id')
         time_period = request.args.get('time_period', default='monthly')
-        
+
         if time_period not in ['monthly', 'quarterly', 'yearly']:
             return jsonify({'error': 'Invalid time period'}), 400
 
@@ -462,21 +554,21 @@ def export_forecast():
         ''')
 
         results = db.session.execute(query, {
-            'xer_file_id': xer_file_id, 
-            'proj_id': proj_id, 
+            'xer_file_id': xer_file_id,
+            'proj_id': proj_id,
             'time_period': time_period
         }).fetchall()
 
         # Prepare CSV data
         output = StringIO()
         writer = csv.writer(output)
-        
+
         # Prepare headers and data
         if results:
             headers = ['Cost Type'] + [row.period for row in results]
             actual_costs = ['Actual'] + [row.actual_cost for row in results]
             target_costs = ['Target'] + [row.target_cost for row in results]
-            
+
             # Write data
             writer.writerow(headers)
             writer.writerow(actual_costs)
@@ -496,6 +588,7 @@ def export_forecast():
         logging.error(f'Error exporting cost forecast: {str(e)}')
         return jsonify({'error': 'Failed to export cost forecast'}), 500
 
+
 @app.route('/api/movement_comparison')
 @cache.cached(timeout=300, query_string=True)
 def movement_comparison():
@@ -509,18 +602,19 @@ def movement_comparison():
             return jsonify({'error': 'Missing required parameters'}), 400
 
         comparison_data = compare_uploads(upload_id_1, upload_id_2, proj_id, comparison_method)
-        
+
         summary = {
             'total_changes': len(comparison_data),
             'added_tasks': sum(1 for item in comparison_data if 'added' in item['changes']),
             'removed_tasks': sum(1 for item in comparison_data if 'removed' in item['changes']),
             'cost_changes': sum(1 for item in comparison_data if 'cost' in item['changes'])
         }
-        
+
         return jsonify({'summary': summary, 'details': comparison_data})
     except Exception as e:
         logging.error(f'Error comparing uploads: {str(e)}')
         return jsonify({'error': 'Failed to compare uploads'}), 500
+
 
 def compare_uploads(upload_id_1, upload_id_2, proj_id, comparison_method='id'):
     tasks_1 = Task.query.filter(Task.xer_file_id == upload_id_1, Task.proj_id == proj_id).all()
@@ -575,6 +669,7 @@ def compare_uploads(upload_id_1, upload_id_2, proj_id, comparison_method='id'):
 
     return comparison
 
+
 def get_cost_values(task_id, xer_file_id, proj_id):
     query = text('''
         SELECT 
@@ -595,11 +690,13 @@ def get_cost_values(task_id, xer_file_id, proj_id):
         'remain': float(result.remain_cost)
     }
 
+
 def compare_cost_values(cost1, cost2):
     # Use a small threshold (0.01) to account for floating-point precision issues
-    return (abs(cost1['actual'] - cost2['actual']) > 0.01 or 
-            abs(cost1['target'] - cost2['target']) > 0.01 or 
+    return (abs(cost1['actual'] - cost2['actual']) > 0.01 or
+            abs(cost1['target'] - cost2['target']) > 0.01 or
             abs(cost1['remain'] - cost2['remain']) > 0.01)
+
 
 def calculate_date_difference(date1, date2):
     if date1 and date2:
@@ -608,6 +705,7 @@ def calculate_date_difference(date1, date2):
         return (d2 - d1).days
     return None
 
+
 # This function is no longer needed and can be removed
 
 def sum_task_costs(tasks):
@@ -615,6 +713,7 @@ def sum_task_costs(tasks):
     total_target = sum(task.target_cost for task in tasks if task.target_cost)
     total_remain = sum(task.remain_cost for task in tasks if task.remain_cost)
     return total_actual, total_target, total_remain
+
 
 if __name__ == '__main__':
     app.run(debug=True, threaded=True)

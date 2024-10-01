@@ -1,13 +1,25 @@
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import text, func
 
 db = SQLAlchemy()
+
+class User(db.Model):
+    __tablename__ = 'USER'
+    user_id = db.Column(db.Integer, primary_key=True)
+    user_name = db.Column(db.String)
+    user_email = db.Column(db.String)
+    user_password = db.Column(db.String)
 
 class Project(db.Model):
     __tablename__ = 'PROJECT'
     proj_id = db.Column(db.String, primary_key=True)
     proj_short_name = db.Column(db.String)
     xer_file_id = db.Column(db.Integer)
+
+    # Nullable foreign key linking to the User table
+    user_id = db.Column(db.Integer, db.ForeignKey('USER.user_id'), nullable=True)
+
+    # Relationship to access the User object from the Project object
+    user = db.relationship('User', backref='projects')
 
 class Task(db.Model):
     __tablename__ = 'TASK'
